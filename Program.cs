@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using TQ.Mesh.Parts;
+using static TQ.Mesh.Parts.Bones;
 using static TQ.Mesh.Parts.VertexBuffer;
 
 namespace TQ.Mesh_Test
@@ -37,29 +38,18 @@ namespace TQ.Mesh_Test
                     Console.WriteLine($"Y: {extents.MinY}, {extents.MaxY}");
                     Console.WriteLine($"Z: {extents.MinZ}, {extents.MaxZ}");
                 }
-                else if (part.Is(out Span<Bone> bones))
+                else if (part.Is(out Bones bones))
                 {
                     Console.WriteLine("=== Bones ===");
-                    Console.WriteLine($"Count: {bones.Length}");
-                    foreach (ref var bone in bones)
-                    {
-                        Console.WriteLine("--- Bone ---");
-                        Console.WriteLine($"Name: {bone.Name}");
-                        Console.WriteLine($"FirstChild: {bone.FirstChild}");
-                        Console.WriteLine($"ChildCount: {bone.ChildCount}");
-                        unsafe
-                        {
-                            Console.WriteLine("Axes:");
-                            fixed (float* axes = bone.Axes)
-                            {
-                                for (int i = 0; i < 3; i++)
-                                    Console.WriteLine($" [{axes[i * 3]}, {axes[i * 3 + 1]}, {axes[i * 3 + 2]}]");
-                            }
-                            Console.WriteLine("Position:");
-                            fixed (float* position = bone.Position)
-                            { Console.WriteLine($" [{position[0]}, {position[1]}, {position[2]}]"); }
-                        }
-                    }
+                    Console.WriteLine($"Count: {bones.Count}");
+                    PrintBoneTree(bones[0]);
+                }
+                else if (part.Is(out Unknown13 unknown13))
+                {
+                    Console.WriteLine("=== Unknown 13 ===");
+                    foreach (var @byte in unknown13.Data)
+                        Console.Write($"{@byte} ");
+                    Console.WriteLine("\u0008");
                 }
                 else
                 {
@@ -67,6 +57,22 @@ namespace TQ.Mesh_Test
                     Console.WriteLine($"[ {part.Data.Length} bytes ]");
                 }
             }
+        }
+
+        static void PrintBoneTree(Bone bone, string indentation = "")
+        {
+            Console.WriteLine($"{indentation}--- Bone ---");
+            Console.WriteLine($"{indentation}Name: {bone.Name}");
+            Console.WriteLine($"{indentation}ChildCount: {bone.ChildCount}");
+            Console.WriteLine($"{indentation}Axes:");
+            var axes = bone.Axes;
+            for (int i = 0; i < 3; i++)
+                Console.WriteLine($"{indentation}  [{axes[i * 3]}, {axes[i * 3 + 1]}, {axes[i * 3 + 2]}]");
+            Console.WriteLine($"{indentation}Position:");
+            var position = bone.Position;
+            Console.WriteLine($"{indentation}  [{position[0]}, {position[1]}, {position[2]}]");
+            foreach (var childBone in bone)
+                PrintBoneTree(childBone, indentation + "|");
         }
     }
 }
