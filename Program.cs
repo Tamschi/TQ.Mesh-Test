@@ -95,6 +95,23 @@ namespace TQ.Mesh_Test
                         Console.WriteLine($"Unknown: {hitbox.Unknown.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b)}");
                     }
                 }
+                else if (part.Is(out Shaders shaders))
+                {
+                    Console.WriteLine("=== Shaders ===");
+                    foreach (var shader in shaders)
+                    {
+                        Console.WriteLine("--- Shader ---");
+                        Console.WriteLine($"File Name: {shader.FileName}");
+                        Console.WriteLine("Parameters:");
+                        foreach (var parameter in shader)
+                        {
+                            Console.Write($"  {parameter.Name}: ");
+                            if (parameter.ValueIs(out string @string)) Console.WriteLine($"\"{@string}\"");
+                            else if (parameter.ValueIs(out Span<float> floats)) Console.WriteLine(floats.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b));
+                            else Console.WriteLine("[ Unknown Format ]");
+                        }
+                    }
+                }
                 else
                 {
                     Console.WriteLine($"=== {part.Id} ===");
