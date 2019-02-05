@@ -3,6 +3,7 @@ using System.IO;
 using TQ.Mesh.Parts;
 using static TQ.Mesh.Parts.Bones;
 using static TQ.Mesh.Parts.VertexBuffer;
+using System.Linq;
 
 namespace TQ.Mesh_Test
 {
@@ -11,7 +12,9 @@ namespace TQ.Mesh_Test
         static void Main(string[] args)
         {
             Span<byte> file = File.ReadAllBytes(args.Length > 0 ? args[0] : "../../../mesh.msh");
-            foreach (var part in new Mesh.Mesh(file))
+            var mesh = new Mesh.Mesh(file);
+            Console.WriteLine($"File Format Version: {mesh.Version}");
+            foreach (var part in mesh)
             {
                 if (part.Is(out MIF mif))
                 {
@@ -50,6 +53,34 @@ namespace TQ.Mesh_Test
                     foreach (var @byte in unknown13.Data)
                         Console.Write($"{@byte} ");
                     Console.WriteLine("\u0008");
+                }
+                else if (part.Is(out IndexBuffer indexBuffer))
+                {
+                    Console.WriteLine("=== Index Buffer ===");
+                    Console.WriteLine($"Triangle Count: {indexBuffer.TriangleCount}");
+                    Console.WriteLine($"Draw Call Count: {indexBuffer.DrawCallCount}");
+                    Console.WriteLine($"Triangle Indices: [ {indexBuffer.TriangleIndices.Length} triangles ]");
+                    foreach (var drawCall in indexBuffer)
+                    {
+                        Console.WriteLine("--- Draw Call ---");
+                        Console.WriteLine($"Shader ID: {drawCall.Common.ShaderID}");
+                        Console.WriteLine($"Start Face Index: {drawCall.Common.StartFaceIndex}");
+                        Console.WriteLine($"Face Count: {drawCall.Common.FaceCount}");
+                        if (mesh.Version == 11)
+                        {
+                            Console.WriteLine($"Sub Shader ID: {drawCall.At11.SubShader}");
+                            Console.WriteLine($"X: {drawCall.At11.MinX} to {drawCall.At11.MaxX}");
+                            Console.WriteLine($"Y: {drawCall.At11.MinY} to {drawCall.At11.MaxY}");
+                            Console.WriteLine($"Z: {drawCall.At11.MinZ} to {drawCall.At11.MaxZ}");
+                        }
+                        Console.WriteLine(@$"Bones: {
+                            drawCall
+                            .BoneMap
+                            .ToArray()
+                            .Select(x => x.ToString())
+                            .Aggregate((a, b) => a + ", " + b)
+                        }");
+                    }
                 }
                 else
                 {
