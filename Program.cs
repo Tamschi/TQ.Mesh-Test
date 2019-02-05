@@ -82,6 +82,19 @@ namespace TQ.Mesh_Test
                         }");
                     }
                 }
+                else if (part.Is(out Span<Hitbox> hitboxes))
+                {
+                    Console.WriteLine("=== Hitboxes ===");
+                    foreach (ref var hitbox in hitboxes)
+                    {
+                        Console.WriteLine("--- Hitbox ---");
+                        Console.WriteLine($"Name: {hitbox.Name}");
+                        Console.WriteLine($"Position 1: {hitbox.Position1.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b)}");
+                        Console.WriteLine($"Axes: {hitbox.Axes.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b)}");
+                        Console.WriteLine($"Position 2: {hitbox.Position2.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b)}");
+                        Console.WriteLine($"Unknown: {hitbox.Unknown.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b)}");
+                    }
+                }
                 else
                 {
                     Console.WriteLine($"=== {part.Id} ===");
