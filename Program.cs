@@ -11,7 +11,7 @@ namespace TQ.Mesh_Test
     {
         static void Main(string[] args)
         {
-            Span<byte> file = File.ReadAllBytes(args.Length > 0 ? args[0] : "../../../mesh.msh");
+            Span<byte> file = File.ReadAllBytes(args.Length > 0 ? args[0] : "mesh.msh");
             var mesh = new Mesh.Mesh(file);
             Console.WriteLine($"File Format Version: {mesh.Version}");
             foreach (var part in mesh)

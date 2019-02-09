@@ -19,4 +19,10 @@
     <ProjectReference Include="..\TQ.Mesh\TQ.Mesh.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="mesh.msh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
