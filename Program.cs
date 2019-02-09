@@ -29,9 +29,9 @@ namespace TQ.Mesh_Test
                 else if (part.Is(out VertexBuffer vertexBuffer))
                 {
                     Console.WriteLine("=== Vertex Buffer ===");
-                    Console.WriteLine($"{nameof(vertexBuffer.Chunks)}:");
-                    foreach (var chunk in vertexBuffer.Chunks)
-                        Console.WriteLine($"  {Enum.GetName(typeof(ChunkId), chunk)} ({GetChunkSize(chunk)} bytes)");
+                    Console.WriteLine($"{nameof(vertexBuffer.Attributes)}:");
+                    foreach (var attribute in vertexBuffer.Attributes)
+                        Console.WriteLine($"  {Enum.GetName(typeof(AttributeId), attribute)} ({GetAttributeSize(attribute)} bytes)");
                     Console.WriteLine($"{nameof(vertexBuffer.Buffer)}: [ {vertexBuffer.Buffer.Length} bytes ]");
                 }
                 else if (part.Is(out Extents extents))
