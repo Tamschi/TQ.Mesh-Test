@@ -4,6 +4,7 @@ using TQ.Mesh.Parts;
 using static TQ.Mesh.Parts.Bones;
 using static TQ.Mesh.Parts.VertexBuffer;
 using System.Linq;
+using System.Numerics;
 
 namespace TQ.Mesh_Test
 {
@@ -34,12 +35,12 @@ namespace TQ.Mesh_Test
                         Console.WriteLine($"  {Enum.GetName(typeof(AttributeId), attribute)} ({GetAttributeSize(attribute)} bytes)");
                     Console.WriteLine($"{nameof(vertexBuffer.Buffer)}: [ {vertexBuffer.Buffer.Length} bytes ]");
                 }
-                else if (part.Is(out Extents extents))
+                else if (part.Is(out Span<Extents> extentsSpan))
                 {
+                    ref var extents = ref extentsSpan[0];
                     Console.WriteLine("=== Extents ===");
-                    Console.WriteLine($"X: {extents.MinX}, {extents.MaxX}");
-                    Console.WriteLine($"Y: {extents.MinY}, {extents.MaxY}");
-                    Console.WriteLine($"Z: {extents.MinZ}, {extents.MaxZ}");
+                    Console.WriteLine($"Min: {extents.Min}");
+                    Console.WriteLine($"Max: {extents.Max}");
                 }
                 else if (part.Is(out Bones bones))
                 {
@@ -69,9 +70,8 @@ namespace TQ.Mesh_Test
                         if (mesh.Version == 11)
                         {
                             Console.WriteLine($"Sub Shader ID: {drawCall.At11.SubShader}");
-                            Console.WriteLine($"X: {drawCall.At11.MinX} to {drawCall.At11.MaxX}");
-                            Console.WriteLine($"Y: {drawCall.At11.MinY} to {drawCall.At11.MaxY}");
-                            Console.WriteLine($"Z: {drawCall.At11.MinZ} to {drawCall.At11.MaxZ}");
+                            Console.WriteLine($"Min: {drawCall.At11.Min}");
+                            Console.WriteLine($"Max: {drawCall.At11.Max}");
                         }
                         Console.WriteLine(@$"Bones: {
                             drawCall
@@ -89,9 +89,9 @@ namespace TQ.Mesh_Test
                     {
                         Console.WriteLine("--- Hitbox ---");
                         Console.WriteLine($"Name: {hitbox.Name}");
-                        Console.WriteLine($"Position 1: {hitbox.Position1.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b)}");
+                        Console.WriteLine($"Position 1: {hitbox.Position1}");
                         Console.WriteLine($"Axes: {hitbox.Axes.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b)}");
-                        Console.WriteLine($"Position 2: {hitbox.Position2.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b)}");
+                        Console.WriteLine($"Position 2: {hitbox.Position2}");
                         Console.WriteLine($"Unknown: {hitbox.Unknown.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b)}");
                     }
                 }
@@ -107,7 +107,9 @@ namespace TQ.Mesh_Test
                         {
                             Console.Write($"  {parameter.Name}: ");
                             if (parameter.ValueIs(out string @string)) Console.WriteLine($"\"{@string}\"");
-                            else if (parameter.ValueIs(out Span<float> floats)) Console.WriteLine(floats.ToArray().Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b));
+                            else if (parameter.ValueIs(out float @float)) Console.WriteLine(@float);
+                            else if (parameter.ValueIs(out Vector2 vector2)) Console.WriteLine(vector2);
+                            else if (parameter.ValueIs(out Vector3 vector3)) Console.WriteLine(vector3);
                             else Console.WriteLine("[ Unknown Format ]");
                         }
                     }
@@ -131,7 +133,7 @@ namespace TQ.Mesh_Test
                 Console.WriteLine($"{indentation}  [{axes[i * 3]}, {axes[i * 3 + 1]}, {axes[i * 3 + 2]}]");
             Console.WriteLine($"{indentation}Position:");
             var position = bone.Position;
-            Console.WriteLine($"{indentation}  [{position[0]}, {position[1]}, {position[2]}]");
+            Console.WriteLine($"{indentation}  {position}");
             foreach (var childBone in bone)
                 PrintBoneTree(childBone, indentation + "|");
         }
